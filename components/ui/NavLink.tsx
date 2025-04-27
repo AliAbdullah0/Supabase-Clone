@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { NavLinkProps } from "../../types";
 
 export const NavLink = ({ href, children, className }:NavLinkProps) => {
     return (
