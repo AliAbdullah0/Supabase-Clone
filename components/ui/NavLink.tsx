@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-export const NavLink = ({ href, children, className }:{href:string,className:string,children:string}) => {
+export const NavLink = ({ href, children, className }:{href:string,className:string,children:React.ReactNode}) => {
     return (
       <Link
         href={href}
