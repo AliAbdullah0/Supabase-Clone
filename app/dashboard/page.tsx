@@ -8,7 +8,7 @@ const Dashboard = async () => {
   const projects = await getAllProjects()
   return (
     <Suspense fallback={<ProjectsLoading/>}>
-    <section className='flex flex-col w-full'>
+    <section className='flex flex-col w-full p-5'>
       <ProjectActionBar/>
       <div className='mt-4 flex md:flex-row flex-col gap-4 flex-wrap'>
         {

@@ -2,14 +2,9 @@
 import { ArrowDownLeft } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
+import { Heading } from './ui/Heading'
+import Image from 'next/image'
 
-const Heading = ({ text, className, to }: { text: string; className?: string; to?: string }) => {
-  return (
-    <Link href={to ?? ''}>
-      <h2 className={`font-medium cursor-pointer text-sm ${className} mb-2`}>{text}</h2>
-    </Link>
-  )
-}
 
 const DashboardSideBar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -47,12 +42,12 @@ const DashboardSideBar = () => {
       </div>
 
       <div
-        className={`fixed inset-y-0 left-0 w-64 bg-dark border-r border-white/10 h-screen transform transition-transform duration-300 ease-in-out z-40 md:static md:transform-none ${
+        className={`fixed inset-y-0 left-0 w-64 bg-dark border-r border-white/10 min-h-screen transform transition-transform duration-300 ease-in-out z-40 md:static md:transform-none ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         } flex flex-col`}
       >
         <div className="flex px-6 py-3 border-b border-white/10 w-full">
-          <h2 className="font-medium text-lg text-white">Supabase</h2>
+          <h2 className="font-medium text-lg text-white flex items-center gap-3"><Image src={'/supabase-logo-icon.png'} alt='Logo' height={28} width={28}/> Supabase</h2>
         </div>
 
         <div className="flex flex-col px-6 py-6 border-b border-white/10 w-full">

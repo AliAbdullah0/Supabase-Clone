@@ -1,6 +1,6 @@
 
 export const generateSlug = (name:string)=>{
-    const slug = name.toLowerCase().replace(/\s+/g, '-').concat("supabase-clone");    
+    const slug = name.toLowerCase().replace(/\s+/g, '-').concat("-supabase-clone");    
     return slug
 }
 

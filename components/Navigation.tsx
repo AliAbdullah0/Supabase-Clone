@@ -7,14 +7,14 @@ import { PrimaryButton } from './ui/PrimaryButton';
 import { useCurrentUser } from '@/context/UserContext';
 import { useRouter } from 'next/navigation';
 
-const Navigation: React.FC = () => {
+const Navigation = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
   const router = useRouter()
   
   const user = useCurrentUser()
-  if(user) router.push('/dashboard')
+  // if(user) router.push('/dashboard')
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleMobileProducts = () => setIsMobileProductsOpen(!isMobileProductsOpen);

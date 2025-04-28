@@ -31,10 +31,11 @@ const ProjectPageSideBar = ({ slug, project }: { slug: string; project: Project 
   }, [])
 
   const options: SidebarOption[] = [
-    { label: 'Table Editor', href: `/project/${slug}/table-editor`, icon: Table },
-    { label: 'Schema Builder', href: `/project/${slug}/schema-builder`, icon: LayoutGrid },
-    { label: 'Tables', href: `/project/${slug}/tables`, icon: Database },
-    { label: 'Project Settings', href: `/project/${slug}/settings`, icon: Settings },
+    { label: 'Databases', href: `/dashboard/project/${slug}/database`, icon: Database },
+    { label: 'Table Editor', href: `/dashboard/project/${slug}/table`, icon: Table },
+    { label: 'Schema Builder', href: `/dashboard/project/${slug}/schema-builder`, icon: LayoutGrid },
+    { label: 'Tables', href: `/dashboard/project/${slug}/tables`, icon: Table },
+    { label: 'Project Settings', href: `/dashboard/project/${slug}/settings`, icon: Settings },
   ]
 
   return (
@@ -58,7 +59,7 @@ const ProjectPageSideBar = ({ slug, project }: { slug: string; project: Project 
         } flex flex-col`}
       >
         <div className="flex items-center justify-between px-6 py-4 md:border-b border-white/10">
-          <h2 className="text-lg font-medium text-white">{project?.name}</h2>
+          <h2 className="text-lg font-medium first-letter:uppercase text-white">{project?.name}</h2>
           <button
             onClick={toggleSidebar}
             className="md:hidden text-white/65 hover:text-white focus:outline-none"
@@ -80,7 +81,6 @@ const ProjectPageSideBar = ({ slug, project }: { slug: string; project: Project 
             </svg>
           </button>
         </div>
-        {/* Sidebar Options */}
         <div className="flex flex-col px-6 py-4 space-y-2">
           {options.map((option) => (
             <Link
@@ -94,8 +94,6 @@ const ProjectPageSideBar = ({ slug, project }: { slug: string; project: Project 
           ))}
         </div>
       </div>
-
-      {/* Overlay for mobile when sidebar is open */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden"

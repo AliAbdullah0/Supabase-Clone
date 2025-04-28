@@ -81,11 +81,19 @@ export const getProject = async (slug:string) => {
             where: {
                 slug,
             },
-            include:{
-                ApiKey:true,
-                Bucket:true,
-                database:true,
-                creator:true
+            select:{
+              id:true,
+              ApiKey:true,
+              Bucket:true,
+              database:true,
+              creator:true,
+              AuthUser:true,
+              created_at:true,
+              creatorId:true,
+              description:true,
+              name:true,
+              updated_at:true,
+              slug:true
             }
         });
 

@@ -1,4 +1,5 @@
-"use client";
+'use client';
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,7 +30,7 @@ interface AuthFormProps {
 interface AuthResponse {
   success: boolean;
   status: number;
-  message:string;
+  message: string;
 }
 
 const signUpSchema = z.object({
@@ -83,21 +84,21 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
       const response: AuthResponse | undefined =
         mode === 'signup' ? await createUser(formData) : await loginUser(formData);
 
-        if (response) {
-          if (!response.success) {
-            const errorMessage =
-              response.status === 403
-                ? 'Invalid credentials'
-                : response.status === 500
-                ? 'Server error, please try again'
-                : 'User already exists';
-            setError(errorMessage);
-            toast.error(errorMessage);
-          } else if (response.success) {
-            toast.success(response.message);
-            router.push('/dashboard');
-          }
+      if (response) {
+        if (!response.success) {
+          const errorMessage =
+            response.status === 403
+              ? 'Invalid credentials'
+              : response.status === 500
+              ? 'Server error, please try again'
+              : 'User already exists';
+          setError(errorMessage);
+          toast.error(errorMessage);
+        } else if (response.success) {
+          toast.success(response.message);
+          router.push('/dashboard');
         }
+      }
     } catch (error: any) {
       const errorMessage = error.message || 'An unexpected error occurred';
       setError(errorMessage);
@@ -108,41 +109,42 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-dark px-4">
-      <Card className={cn('bg-dark text-neutral-100 border-white/10 w-full min-w-[500px]')}>
-        <CardHeader className="flex justify-between items-center gap-2 pb-6">
+    <div className="flex justify-center items-center min-h-screen bg-dark px-4 sm:px-6 lg:px-8">
+      <Toaster richColors position="top-right" />
+      <Card className={cn('bg-dark text-neutral-100 border-white/10 w-full max-w-md sm:max-w-lg')}>
+        <CardHeader className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-2 pb-4 sm:pb-6">
           <Image
             src="/supabase-logo-icon.png"
             alt="Supabase Logo"
-            width={43}
-            height={43}
-            className="mb-2"
+            width={32}
+            height={32}
+            className="mb-2 sm:mb-0 w-8 h-8 sm:w-10 sm:h-10"
           />
-          <CardTitle className="text-3xl font-bold">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-center sm:text-left">
             {mode === 'signup' ? 'Sign Up' : 'Sign In'}
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-8 pb-8">
+        <CardContent className="px-4 sm:px-8 pb-6 sm:pb-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {mode === 'signup' && (
                 <FormField
                   control={form.control}
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-lg">Username</FormLabel>
+                      <FormLabel className="text-base sm:text-lg">Username</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Enter your username"
                           className={cn(
-                            'bg-hover border-white/10 text-neutral-100 placeholder:text-neutral-400 h-12 text-lg',
+                            'bg-hover border-white/10 text-neutral-100 placeholder:text-neutral-400 h-10 sm:h-12 text-base sm:text-lg',
                             'focus:ring-main focus:border-main'
                           )}
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-500 text-sm" />
                     </FormItem>
                   )}
                 />
@@ -152,19 +154,19 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg">Email</FormLabel>
+                    <FormLabel className="text-base sm:text-lg">Email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         placeholder="Enter your email"
                         className={cn(
-                          'bg-hover border-white/10 text-neutral-100 placeholder:text-neutral-400 h-12 text-lg',
+                          'bg-hover border-white/10 text-neutral-100 placeholder:text-neutral-400 h-10 sm:h-12 text-base sm:text-lg',
                           'focus:ring-main focus:border-main'
                         )}
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-500 text-sm" />
                   </FormItem>
                 )}
               />
@@ -173,35 +175,40 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg">Password</FormLabel>
+                    <FormLabel className="text-base sm:text-lg">Password</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
                         placeholder="Enter your password"
                         className={cn(
-                          'bg-hover border-white/10 text-neutral-100 placeholder:text-neutral-400 h-12 text-lg',
+                          'bg-hover border-white/10 text-neutral-100 placeholder:text-neutral-400 h-10 sm:h-12 text-base sm:text-lg',
                           'focus:ring-main focus:border-main'
                         )}
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-500 text-sm" />
                   </FormItem>
                 )}
               />
               <Button
                 type="submit"
                 className={cn(
-                  'w-full bg-main hover:bg-hover text-white hover:border hover:border-green-600 transition-transform duration-200 h-12 text-lg',
+                  'w-full bg-main hover:bg-hover text-white hover:border hover:border-green-600 transition-transform duration-200 h-10 sm:h-12 text-base sm:text-lg',
                   isLoading && 'opacity-70 cursor-not-allowed'
                 )}
                 disabled={isLoading}
               >
-                {isLoading ? <p className='flex items-center justify-center w-full'><Loader2 className='h-4 w-4 mr-2 animate-spin'/>{mode==='signup' ? 'Signing Up' : 'Signing In'}</p> : mode === 'signup' ? 'Sign Up' : 'Sign In'}
+                {isLoading ? (
+                  <p className="flex items-center justify-center w-full">
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {mode === 'signup' ? 'Signing Up' : 'Signing In'}
+                  </p>
+                ) : mode === 'signup' ? 'Sign Up' : 'Sign In'}
               </Button>
             </form>
           </Form>
-          <p className="text-center text-base mt-6">
+          <p className="text-center text-sm sm:text-base mt-4 sm:mt-6">
             {mode === 'signup' ? (
               <>
                 Already have an account?{' '}
