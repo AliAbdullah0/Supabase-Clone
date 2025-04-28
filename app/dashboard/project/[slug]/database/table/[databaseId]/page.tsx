@@ -146,7 +146,7 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
                 <DialogTitle className="text-white text-2xl">Create New Table</DialogTitle>
               </DialogHeader>
               <Form {...form}>
-              <form onSubmit={form.handleSubmit((data) => onSubmit(data as FormValues))} className="space-y-6 mt-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
                   {/* Table Name */}
                   <FormField
                     control={form.control}
