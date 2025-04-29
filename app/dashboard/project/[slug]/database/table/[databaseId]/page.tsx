@@ -9,7 +9,7 @@ import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Table, Plus, Save, Loader2 } from 'lucide-react';
 import TablesList from '@/components/TablesList';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -86,7 +86,7 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
   const [tables, setTables] = useState<TableData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [paramsId,setParamsId] = useState('')
+  const [paramsId, setParamsId] = useState('');
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -105,7 +105,7 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
     const fetchTables = async () => {
       try {
         const { databaseId } = await params;
-        setParamsId(databaseId)
+        setParamsId(databaseId);
         const tableList = await getTables(databaseId);
         setTables(tableList);
       } catch (err: any) {
@@ -140,24 +140,24 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
   };
 
   return (
-    <div className="flex w-full min-h-screen bg-dark">
-      <TablesList tables={tables} error={error} databaseId={paramsId}/>
+    <div className="flex w-full bg-dark min-h-screen">
+      <TablesList tables={tables} error={error} databaseId={paramsId} />
 
-      <div className="flex-1 p-4 sm:p-8">
+      <div className="flex-1 p-4 sm:p-8 overflow-auto">
         <h1 className="text-3xl sm:text-4xl font-bold text-neutral-100 mb-6 border-b border-white/10 pb-4">Table Editor</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <div className="bg-hover border border-white/10 rounded-lg p-6 hover:bg-[#1a1a1a] transition-colors cursor-pointer flex flex-col items-center justify-center h-48">
-                <Plus className="h-12 w-12 text-green mb-4" />
-                <h3 className="text-xl font-semibold text-neutral-100">Create New Table</h3>
-                <p className="text-white/75 mt-2 text-center">Add a new table to your database</p>
+        <div className="grid grid-cols-1 gap-6">
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <div className="bg-hover border border-white/10 rounded-lg p-4 hover:bg-[#1a1a1a] transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[150px]">
+                <Plus className="h-8 w-8 text-green mb-2" />
+                <h3 className="text-lg font-semibold text-neutral-100">Create New Table</h3>
+                <p className="text-white/75 mt-1 text-sm text-center">Add a new table to your database</p>
               </div>
-            </DialogTrigger>
-            <DialogContent className="w-full sm:w-3/4 max-w-[800px] bg-dark border border-white/10 p-6">
-              <DialogHeader>
-                <DialogTitle className="text-neutral-100 text-2xl">Create New Table</DialogTitle>
-              </DialogHeader>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full md:w-1/2 max-w-[800px] bg-dark border-l border-white/10 p-6 overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle className="text-neutral-100 text-2xl">Create New Table</SheetTitle>
+              </SheetHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
                   <FormField
@@ -322,9 +322,9 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
                                       defaultValue={field.value}
                                       disabled={!form.watch(`columns.${index}.foreignTableId`)}
                                     >
-                                      <SelectTrigger className="bg-[#171717] border border-white/10 text-neutral-100">
+                                      <SheetTrigger className="bg-[#171717] border border-white/10 text-neutral-100">
                                         <SelectValue placeholder="Select column" />
-                                      </SelectTrigger>
+                                      </SheetTrigger>
                                       <SelectContent className="bg-[#171717] border-white/10 text-neutral-100">
                                         {form.watch(`columns.${index}.foreignTableId`) &&
                                           tables
@@ -350,7 +350,7 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
                       onClick={addColumn}
                       className="bg-main text-neutral-100 px-4 py-2 rounded-md hover:bg-[#007a4a] transition-colors"
                     >
-                      Add Column 
+                      Add Column
                     </Button>
                   </div>
                   {error && <p className="text-red-500">{error}</p>}
@@ -360,7 +360,12 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
                     disabled={form.formState.isSubmitting}
                     className="bg-main text-neutral-100 px-6 py-3 rounded-md hover:bg-[#007a4a] transition-colors disabled:opacity-50 flex items-center gap-2 w-full"
                   >
-                    {form.formState.isSubmitting ? <p className="flex items-center justify-center "><Loader2 className="h-4 w-4 mr-2 animate-spin"/>Creating</p> : (
+                    {form.formState.isSubmitting ? (
+                      <p className="flex items-center justify-center">
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Creating
+                      </p>
+                    ) : (
                       <>
                         <Save className="h-5 w-5" />
                         Create Table
@@ -369,8 +374,8 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
                   </Button>
                 </form>
               </Form>
-            </DialogContent>
-          </Dialog>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </div>
