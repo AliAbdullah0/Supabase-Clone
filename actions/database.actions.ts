@@ -12,21 +12,12 @@ export async function createDatabase(projectId: string, formData: FormData) {
     if (!name || name.trim() === '') {
       throw new Error('Database name is required');
     }
-
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-    });
-    if (!project) {
-      throw new Error('Project not found');
-    }
-
     const existingDatabase = await prisma.database.findUnique({
-      where: { projectId },
-    });
-    if (existingDatabase) {
-      throw new Error('A database already exists for this project');
-    }
-
+      where:{
+        name,
+      }
+    })
+    if(existingDatabase) throw new Error("There is already a database with this name")
     const response = await prisma.database.create({
       data: {
         name,
@@ -43,6 +34,8 @@ export async function createDatabase(projectId: string, formData: FormData) {
     throw new Error(error.message || 'Failed to create database');
   }
 }
+
+
 
 export async function getAllDatabases(projectId: string) {
   try {
@@ -176,5 +169,34 @@ export async function createTable(databaseId: string, formData: FormData) {
     }
     console.error('Error creating table:', error);
     throw new Error(error.message || 'Failed to create table');
+  }
+}
+
+export const getTableById = async (tableId:string)=>{
+  try {
+    const response = await prisma.table.findUnique({
+      where: {
+        id: tableId,
+      },
+      include: {
+        columns: {
+          select: {
+            id: true,
+            name: true,
+            foreignColumnId:true,
+            foreignTableId:true,
+            isPrimary:true,
+            isForeignKey:true,
+            isNullable:true,
+            type:true,
+            updatedAt:true,
+            createdAt:true,
+          },
+        },
+      },
+    })
+    return response;
+  } catch (error) {
+    throw new Error("Error Fetching Table")
   }
 }

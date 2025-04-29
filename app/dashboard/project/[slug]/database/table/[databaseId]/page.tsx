@@ -10,9 +10,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, Plus, Save } from 'lucide-react';
+import { Table, Plus, Save, Loader2 } from 'lucide-react';
+import TablesList from '@/components/TablesList';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// Define form schema with Zod
 const formSchema = z.object({
   name: z.string().min(1, 'Table name is required').max(100, 'Table name must be 100 characters or less'),
   columns: z
@@ -20,17 +22,47 @@ const formSchema = z.object({
       z.object({
         name: z.string().min(1, 'Column name is required'),
         type: z.enum(['TEXT', 'INTEGER', 'BOOLEAN', 'DATE', 'FLOAT']),
-        isNullable: z.boolean().default(true),
-        isPrimary: z.boolean().default(false),
-        isForeignKey: z.boolean().default(false),
+        isNullable: z.boolean(),
+        isPrimary: z.boolean(),
+        isForeignKey: z.boolean(),
         foreignTableId: z.string().optional(),
         foreignColumnId: z.string().optional(),
       })
     )
-    .min(1, 'At least one column is required'),
+    .min(1, 'At least one column is required')
+    .superRefine((columns, ctx) => {
+      const primaryKeys = columns.filter(col => col.isPrimary);
+      if (primaryKeys.length > 1) {
+        primaryKeys.forEach((col, index) => {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [`columns.${index}.isPrimary`],
+            message: 'Only one column can be set as primary key',
+          });
+        });
+      }
+
+      columns.forEach((col, index) => {
+        if (col.isForeignKey) {
+          if (!col.foreignTableId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: [`columns.${index}.foreignTableId`],
+              message: 'Foreign table must be selected for foreign key',
+            });
+          }
+          if (!col.foreignColumnId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: [`columns.${index}.foreignColumnId`],
+              message: 'Foreign column must be selected for foreign key',
+            });
+          }
+        }
+      });
+    }),
 });
 
-// Explicitly define the form type
 type FormValues = z.infer<typeof formSchema>;
 
 type TableData = {
@@ -43,8 +75,10 @@ type TableData = {
     isNullable: boolean;
     isPrimary: boolean;
     isForeignKey: boolean;
-    foreignTableId?: string;
-    foreignColumnId?: string;
+    foreignTableId: string | null;
+    foreignColumnId: string | null;
+    createdAt: Date;
+    updatedAt: Date;
   }>;
 };
 
@@ -53,7 +87,6 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Initialize shadcn/ui form with explicit type
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,7 +100,6 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
     name: 'columns',
   });
 
-  // Fetch tables on mount
   useEffect(() => {
     const fetchTables = async () => {
       try {
@@ -82,13 +114,13 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
     fetchTables();
   }, [params]);
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
     setError(null);
     try {
       const { databaseId } = await params;
       const formData = new FormData();
-      formData.append('name', values.name);
-      formData.append('columns', JSON.stringify(values.columns));
+      formData.append('name', data.name);
+      formData.append('columns', JSON.stringify(data.columns));
 
       await createTable(databaseId, formData);
       setIsOpen(false);
@@ -107,59 +139,37 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
 
   return (
     <div className="flex w-full min-h-screen bg-dark">
-      {/* Left Sidebar */}
-      <div className="w-full md:w-64 bg-hover border-r border-white/10 p-4 flex-shrink-0">
-        <h2 className="text-2xl font-bold text-white mb-4">Tables</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        {tables.length === 0 ? (
-          <p className="text-white/75">No tables found. Create one to get started!</p>
-        ) : (
-          <ul className="space-y-2">
-            {tables.map((table) => (
-              <li
-                key={table.id}
-                className="p-2 rounded-md hover:bg-[#1a1a1a] text-white/75 hover:text-white transition-colors cursor-pointer flex items-center gap-2"
-              >
-                <Table className="h-5 w-5 text-green" />
-                <span>{table.name}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <TablesList tables={tables} error={error} />
 
-      {/* Main Content */}
       <div className="flex-1 p-4 sm:p-8">
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-6">Table Editor</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold text-neutral-100 mb-6 border-b border-white/10 pb-4">Table Editor</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Create Table Card */}
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <div className="bg-hover border border-white/10 rounded-lg p-6 hover:bg-[#1a1a1a] transition-colors cursor-pointer flex flex-col items-center justify-center h-48">
                 <Plus className="h-12 w-12 text-green mb-4" />
-                <h3 className="text-xl font-semibold text-white">Create New Table</h3>
+                <h3 className="text-xl font-semibold text-neutral-100">Create New Table</h3>
                 <p className="text-white/75 mt-2 text-center">Add a new table to your database</p>
               </div>
             </DialogTrigger>
-            <DialogContent className="w-full sm:w-1/2 max-w-[600px] bg-dark border border-white/10 p-6">
+            <DialogContent className="w-full sm:w-3/4 max-w-[800px] bg-dark border border-white/10 p-6">
               <DialogHeader>
-                <DialogTitle className="text-white text-2xl">Create New Table</DialogTitle>
+                <DialogTitle className="text-neutral-100 text-2xl">Create New Table</DialogTitle>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
-                  {/* Table Name */}
                   <FormField
                     control={form.control}
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white font-medium">Table Name</FormLabel>
+                        <FormLabel className="text-neutral-100 font-medium">Table Name</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Table className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 h-5 w-5" />
                             <Input
                               {...field}
-                              className="pl-10 w-full bg-[#171717] border border-white/10 rounded-md p-3 text-white focus:outline-none focus:border-main"
+                              className="pl-10 w-full bg-[#171717] border border-white/10 rounded-md p-3 text-neutral-100 focus:outline-none focus:border-main"
                               placeholder="Enter table name"
                             />
                           </div>
@@ -169,74 +179,186 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
                     )}
                   />
 
-                  {/* Columns */}
                   <div>
-                    <h4 className="text-white font-medium mb-2">Columns</h4>
+                    <h4 className="text-neutral-100 font-medium mb-2">Columns</h4>
                     {fields.map((field, index) => (
-                      <div key={field.id} className="flex gap-4 mb-4">
-                        <FormField
-                          control={form.control}
-                          name={`columns.${index}.name`}
-                          render={({ field }) => (
-                            <FormItem className="flex-1">
-                              <FormLabel className="text-white">Column Name</FormLabel>
-                              <FormControl>
-                                <Input
-                                  {...field}
-                                  className="bg-[#171717] border border-white/10 rounded-md p-3 text-white focus:outline-none focus:border-main"
-                                  placeholder="Enter column name"
-                                />
-                              </FormControl>
-                              <FormMessage className="text-red-500" />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`columns.${index}.type`}
-                          render={({ field }) => (
-                            <FormItem className="w-32">
-                              <FormLabel className="text-white">Type</FormLabel>
-                              <FormControl>
-                                <select
-                                  {...field}
-                                  className="w-full bg-[#171717] border border-white/10 rounded-md p-3 text-white focus:outline-none focus:border-main"
-                                  onChange={(e) => field.onChange(e.target.value)}
-                                >
-                                  <option value="TEXT">TEXT</option>
-                                  <option value="INTEGER">INTEGER</option>
-                                  <option value="BOOLEAN">BOOLEAN</option>
-                                  <option value="DATE">DATE</option>
-                                  <option value="FLOAT">FLOAT</option>
-                                </select>
-                              </FormControl>
-                              <FormMessage className="text-red-500" />
-                            </FormItem>
-                          )}
-                        />
+                      <div key={field.id} className="border border-white/10 rounded-md p-4 mb-4">
+                        <div className="flex gap-4 mb-4">
+                          <FormField
+                            control={form.control}
+                            name={`columns.${index}.name`}
+                            render={({ field }) => (
+                              <FormItem className="flex-1">
+                                <FormLabel className="text-neutral-100">Column Name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    className="bg-[#171717] border border-white/10 rounded-md p-3 text-neutral-100 focus:outline-none focus:border-main"
+                                    placeholder="Enter column name"
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-red-500" />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`columns.${index}.type`}
+                            render={({ field }) => (
+                              <FormItem className="w-32">
+                                <FormLabel className="text-neutral-100">Type</FormLabel>
+                                <FormControl>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                  >
+                                    <SelectTrigger className="bg-[#171717] border border-white/10 text-neutral-100">
+                                      <SelectValue placeholder="Select type" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-[#171717] border-white/10 text-neutral-100">
+                                      <SelectItem value="TEXT">TEXT</SelectItem>
+                                      <SelectItem value="INTEGER">INTEGER</SelectItem>
+                                      <SelectItem value="BOOLEAN">BOOLEAN</SelectItem>
+                                      <SelectItem value="DATE">DATE</SelectItem>
+                                      <SelectItem value="FLOAT">FLOAT</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage className="text-red-500" />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 mb-4">
+                          <FormField
+                            control={form.control}
+                            name={`columns.${index}.isNullable`}
+                            render={({ field }) => (
+                              <FormItem className="flex items-center space-x-2">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    className="border-white/50"
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-white">Nullable</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`columns.${index}.isPrimary`}
+                            render={({ field }) => (
+                              <FormItem className="flex items-center space-x-2">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    className="border-white/50"
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-neutral-100">Primary Key</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`columns.${index}.isForeignKey`}
+                            render={({ field }) => (
+                              <FormItem className="flex items-center space-x-2">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    className="border-white/50"
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-neutral-100">Foreign Key</FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        {form.watch(`columns.${index}.isForeignKey`) && (
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`columns.${index}.foreignTableId`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-neutral-100">Foreign Table</FormLabel>
+                                  <FormControl>
+                                    <Select
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                    >
+                                      <SelectTrigger className="bg-[#171717] border border-white/10 text-neutral-100">
+                                        <SelectValue placeholder="Select table" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-[#171717] border-white/10 text-neutral-100">
+                                        {tables.map((table) => (
+                                          <SelectItem key={table.id} value={table.id}>
+                                            {table.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </FormControl>
+                                  <FormMessage className="text-red-500" />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`columns.${index}.foreignColumnId`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-neutral-100">Foreign Column</FormLabel>
+                                  <FormControl>
+                                    <Select
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                      disabled={!form.watch(`columns.${index}.foreignTableId`)}
+                                    >
+                                      <SelectTrigger className="bg-[#171717] border border-white/10 text-neutral-100">
+                                        <SelectValue placeholder="Select column" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-[#171717] border-white/10 text-neutral-100">
+                                        {form.watch(`columns.${index}.foreignTableId`) &&
+                                          tables
+                                            .find(t => t.id === form.watch(`columns.${index}.foreignTableId`))
+                                            ?.columns.map((column) => (
+                                              <SelectItem key={column.id} value={column.id}>
+                                                {column.name}
+                                              </SelectItem>
+                                            ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </FormControl>
+                                  <FormMessage className="text-red-500" />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
                       </div>
                     ))}
                     <Button
                       type="button"
                       onClick={addColumn}
-                      className="bg-main text-white px-4 py-2 rounded-md hover:bg-[#007a4a] transition-colors"
+                      className="bg-main text-neutral-100 px-4 py-2 rounded-md hover:bg-[#007a4a] transition-colors"
                     >
-                      Add Column
+                      Add Column 
                     </Button>
                   </div>
+                  {error && <p className="text-red-500">{error}</p>}
 
-                  {/* Error Message */}
-                  {error && (
-                    <p className="text-red-500">{error}</p>
-                  )}
-
-                  {/* Submit Button */}
                   <Button
                     type="submit"
                     disabled={form.formState.isSubmitting}
-                    className="bg-main text-white px-6 py-3 rounded-md hover:bg-[#007a4a] transition-colors disabled:opacity-50 flex items-center gap-2 w-full"
+                    className="bg-main text-neutral-100 px-6 py-3 rounded-md hover:bg-[#007a4a] transition-colors disabled:opacity-50 flex items-center gap-2 w-full"
                   >
-                    {form.formState.isSubmitting ? 'Creating...' : (
+                    {form.formState.isSubmitting ? <p className="flex items-center justify-center "><Loader2 className="h-4 w-4 mr-2 animate-spin"/>Creating</p> : (
                       <>
                         <Save className="h-5 w-5" />
                         Create Table

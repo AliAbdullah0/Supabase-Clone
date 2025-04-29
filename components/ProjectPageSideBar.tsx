@@ -32,7 +32,6 @@ const ProjectPageSideBar = ({ slug, project }: { slug: string; project: Project 
 
   const options: SidebarOption[] = [
     { label: 'Databases', href: `/dashboard/project/${slug}/database`, icon: Database },
-    { label: 'Table Editor', href: `/dashboard/project/${slug}/table`, icon: Table },
     { label: 'Schema Builder', href: `/dashboard/project/${slug}/schema-builder`, icon: LayoutGrid },
     { label: 'Tables', href: `/dashboard/project/${slug}/tables`, icon: Table },
     { label: 'Project Settings', href: `/dashboard/project/${slug}/settings`, icon: Settings },

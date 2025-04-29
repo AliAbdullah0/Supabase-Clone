@@ -110,9 +110,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-dark px-4 sm:px-6 lg:px-8">
-      <Toaster richColors position="top-right" />
-      <Card className={cn('bg-dark text-neutral-100 border-white/10 w-full max-w-md sm:max-w-lg')}>
-        <CardHeader className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-2 pb-4 sm:pb-6">
+      <Card className={cn('bg-dark text-neutral-100 border-white/10 w-full max-w-md md:min-w-xl md:max-w-xl')}>
+        <CardHeader className="flex flex-row justify-between items-center gap-2 pb-4 sm:pb-6">
           <Image
             src="/supabase-logo-icon.png"
             alt="Supabase Logo"
@@ -120,7 +119,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
             height={32}
             className="mb-2 sm:mb-0 w-8 h-8 sm:w-10 sm:h-10"
           />
-          <CardTitle className="text-2xl sm:text-3xl font-bold text-center sm:text-left">
+          <CardTitle className="text-xl sm:text-3xl font-bold text-center sm:text-left">
             {mode === 'signup' ? 'Sign Up' : 'Sign In'}
           </CardTitle>
         </CardHeader>

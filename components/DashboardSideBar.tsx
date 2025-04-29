@@ -51,8 +51,8 @@ const DashboardSideBar = () => {
         </div>
 
         <div className="flex flex-col px-6 py-6 border-b border-white/10 w-full">
-          <Heading text="Projects" className="text-white/65" />
-          <Heading text="All Projects" />
+          <Heading  text="Projects" className="text-white/65" />
+          <Heading to='/dashboard' text="All Projects" />
         </div>
         <div className="flex flex-col px-6 py-6 border-b border-white/10 w-full">
           <Heading text="Databases" className="text-white/65" />
