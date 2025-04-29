@@ -110,7 +110,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-dark px-4 sm:px-6 lg:px-8">
-      <Card className={cn('bg-dark text-neutral-100 border-white/10 w-full max-w-md md:min-w-xl md:max-w-xl')}>
+      <Card className={cn('bg-dark text-neutral-100 border-white/10 w-full md:min-w-xl md:max-w-xl')}>
         <CardHeader className="flex flex-row justify-between items-center gap-2 pb-4 sm:pb-6">
           <Image
             src="/supabase-logo-icon.png"
