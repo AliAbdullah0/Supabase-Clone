@@ -44,6 +44,7 @@ const DatabasePage = ({ params }: { params: Promise<{ slug: string }> }) => {
     const fetchDatabases = async () => {
         try {
           const { slug } = await params;
+          setParamSlug(slug)
         const project = await getProject(slug);
         if (!project) {
           throw new Error('Project not found');
