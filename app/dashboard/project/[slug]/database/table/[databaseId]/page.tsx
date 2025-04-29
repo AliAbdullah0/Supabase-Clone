@@ -86,6 +86,7 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
   const [tables, setTables] = useState<TableData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [paramsId,setParamsId] = useState('')
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -104,6 +105,7 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
     const fetchTables = async () => {
       try {
         const { databaseId } = await params;
+        setParamsId(databaseId)
         const tableList = await getTables(databaseId);
         setTables(tableList);
       } catch (err: any) {
@@ -139,7 +141,7 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
 
   return (
     <div className="flex w-full min-h-screen bg-dark">
-      <TablesList tables={tables} error={error} />
+      <TablesList tables={tables} error={error} databaseId={paramsId}/>
 
       <div className="flex-1 p-4 sm:p-8">
         <h1 className="text-3xl sm:text-4xl font-bold text-neutral-100 mb-6 border-b border-white/10 pb-4">Table Editor</h1>

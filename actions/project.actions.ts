@@ -34,6 +34,7 @@ export const createNewProject = async (formData: FormData) => {
       const apiKey = generateApiKey()
       await prisma.apiKey.create({
         data: {
+          name:`${response.name} Api Key`,
           key: apiKey,
           projectId: response.id,
         },
