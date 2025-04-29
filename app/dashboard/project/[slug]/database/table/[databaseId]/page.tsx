@@ -168,7 +168,6 @@ const TableEditorForDatabase = ({ params }: DatabasePageProps) => {
                         <FormLabel className="text-neutral-100 font-medium">Table Name</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Table className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 h-5 w-5" />
                             <Input
                               {...field}
                               className="pl-10 w-full bg-[#171717] border border-white/10 rounded-md p-3 text-neutral-100 focus:outline-none focus:border-main"
