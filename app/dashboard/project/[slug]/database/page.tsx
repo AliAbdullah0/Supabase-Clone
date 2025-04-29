@@ -145,7 +145,7 @@ const DatabasePage = ({ params }: { params: Promise<{ slug: string }> }) => {
           </Dialog>
           {databases.map((db) => (
             <Link
-            href={`/dashboard/project/${paramSlug}/database/table/${db.id}`}
+            href={`/dashboard/project/${paramSlug}/database/${db.id}/table/`}
             key={db.id}
             className="bg-hover border border-white/10 rounded-lg p-6 hover:bg-[#1a1a1a] transition-colors flex flex-col min-h-[150px]"
           >
