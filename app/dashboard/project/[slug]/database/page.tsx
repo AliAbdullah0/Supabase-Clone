@@ -15,7 +15,7 @@ import Badge from '@/components/ui/Badge';
 import { Database, Plus, Save } from 'lucide-react';
 import Link from 'next/link';
 
-// Define form schema with Zod
+
 const formSchema = z.object({
   name: z.string().min(1, 'Database name is required').max(100, 'Database name must be 100 characters or less'),
 });
@@ -32,7 +32,6 @@ const DatabasePage = ({ params }: { params: Promise<{ slug: string }> }) => {
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [paramSlug,setParamSlug ] = useState('')
-  // Initialize shadcn/ui form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -146,7 +145,7 @@ const DatabasePage = ({ params }: { params: Promise<{ slug: string }> }) => {
           </Dialog>
           {databases.map((db) => (
             <Link
-            href={`/dashboard/project/${paramSlug}/database/${db.id}/table/`}
+            href={`/dashboard/project/${paramSlug}/database/table/${db.id}`}
             key={db.id}
             className="bg-hover border border-white/10 rounded-lg p-6 hover:bg-[#1a1a1a] transition-colors flex flex-col min-h-[150px]"
           >
